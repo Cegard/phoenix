@@ -1,25 +1,31 @@
-package abstractions
+package components
 
 import (
-    _"fmt"
     "phoenix/utils"
     "time"
 )
 
 
 type request struct {
-    Id int
     TimeToProcess time.Duration
+    Client *Client
+    Status int
 }
 
 
-func CreateRequest(id int) *request {
+func NewRequest(client *Client) *request {
     
     return &request {
-        Id: id,
+        Client: client,
         TimeToProcess: time.Duration(utils.RandomInt(
             utils.MIN_PROCESS_TIME,
             utils.MAX_PROCESS_TIME),
         ),
+        Status: utils.WAITING_STATUS,
     }
+}
+
+
+func (request *request) SetStatus (processResult int) {
+    request.Status = processResult
 }

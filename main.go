@@ -1,12 +1,12 @@
 package main
 
 import (
-    "phoenix/abstractions"
     "fmt"
+    "phoenix/components"
 )
 
 
 func main() {
-    newRequest := abstractions.CreateRequest(1)
-    fmt.Printf("%d \n", newRequest.TimeToProcess)
+    var loadBalancer = components.GetLoadBalancer()
+    fmt.Println(loadBalancer)
 }
