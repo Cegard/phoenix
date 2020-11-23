@@ -20,6 +20,7 @@ func GetLoadBalancer() *loadBalancer {
         loadBalancerInstance = &loadBalancer {
             services: make(map[int] *service),
         }
+        loadBalancerInstance.AddService(NewService())
     }
     
     return loadBalancerInstance
@@ -33,4 +34,17 @@ func (balancerInstance *loadBalancer) AddService (service *service) {
 
 func (balancerInstance *loadBalancer) RemoveService (serviceId int) {
     delete(balancerInstance.services, serviceId)
+}
+
+
+func (balancerInstance *loadBalancer) getNextFreeServer() *service {
+    
+    for _, service := range balancerInstance.services {
+        
+    }
+}
+
+
+func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
+    
 }
