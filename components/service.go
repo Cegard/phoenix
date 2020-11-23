@@ -6,6 +6,8 @@ import (
     "phoenix/utils"
 )
 
+var currentCount = 0
+
 
 type service struct {
     sync.Mutex
@@ -38,9 +40,11 @@ func (server *service) AddRequest (clientRequest *request) {
 }
 
 
-func (server *service) NewService (id int) *service {
+func NewService() *service {
+    currentCount++
+    
     return &service {
-        Id: id,
+        Id: currentCount,
         CurrentLoad: 0,
         channel: make(chan int, utils.MAX_SERVICE_CAPACITY),
     }
