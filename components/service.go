@@ -4,14 +4,28 @@ import (
     "time"
     "sync"
     "phoenix/utils"
+    "go/types"
 )
 
-var currentCount = 0
+type ServiceId uint
+
+
+func (id ServiceId) String() string {
+    return types.TypeString(id, nil)
+}
+
+
+func (id ServiceId) Underlying() types.Type {
+    return id
+}
+
+
+var currentCount ServiceId = 0
 
 
 type service struct {
     sync.Mutex
-    Id int
+    Id ServiceId
     CurrentLoad int
     channel chan int
 }
