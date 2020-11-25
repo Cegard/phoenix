@@ -3,6 +3,7 @@ package components
 import (
     "phoenix/utils"
     "time"
+    "fmt"
 )
 
 
@@ -26,6 +27,7 @@ func NewRequest(client *Client) *request {
 }
 
 
-func (request *request) SetStatus (processResult int) {
-    request.Status = processResult
+func (clientRequest *request) SetStatus (processResult int) {
+    fmt.Printf("Request with code %d finished after %d seconds/n", clientRequest.Status, clientRequest.TimeToProcess)
+    clientRequest.Status = processResult
 }
