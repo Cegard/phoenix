@@ -28,6 +28,6 @@ func NewRequest(client *Client) *request {
 
 
 func (clientRequest *request) SetStatus (processResult int) {
-    fmt.Printf("Request with code %d finished after %d seconds/n", clientRequest.Status, clientRequest.TimeToProcess)
+    fmt.Printf("Request with code %d finished after %d seconds\n", processResult, clientRequest.TimeToProcess)
     clientRequest.Status = processResult
 }
