@@ -1,8 +1,9 @@
 package components
 
 import (
-    "time"
     "phoenix/utils"
+    "sync"
+    "time"
 )
 
 var currentCount uint = 0
@@ -11,7 +12,8 @@ var currentCount uint = 0
 type service struct {
     Id uint
     currentLoad *Load
-    channel chan int
+    channel *chan int
+    syncGroup *sync.WaitGroup
 }
 
 
@@ -25,23 +27,27 @@ func (server *service) processRequest (clientRequest *request) {
     }
     
     server.currentLoad.DecreaseLoad()
-    <- server.channel
+    server.syncGroup.Done()
+    <- *server.channel
 }
 
 
 func (server *service) AddRequest (clientRequest *request) {
-    server.channel <- 1
+    *server.channel <- 1
     server.currentLoad.IncreaseLoad()
+    server.syncGroup.Add(1)
     go server.processRequest(clientRequest)
 }
 
 
-func NewService() *service {
+func NewService(wg *sync.WaitGroup) *service {
     currentCount++
+    var channel = make(chan int, utils.MAX_SERVICE_CAPACITY)
     
     return &service {
         Id: currentCount,
         currentLoad: &Load{Value: 0},
-        channel: make(chan int, utils.MAX_SERVICE_CAPACITY),
+        channel: &channel,
+        syncGroup: wg,
     }
 }

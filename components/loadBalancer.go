@@ -2,7 +2,8 @@ package components
 
 import (
     "phoenix/utils"
-    _"fmt"
+    "sort"
+    "sync"
 )
 
 var loadBalancerInstance *loadBalancer
@@ -11,34 +12,16 @@ var loadBalancerInstance *loadBalancer
 type loadBalancer struct {
     Balancer
     services []*service
+    syncGroup *sync.WaitGroup
 }
 
 
-func buildComparerById (id uint) func(*interface{}) bool {
-    
-    
-    return func (item *interface{}) bool {
-        
-        return &item.Id == id
-    }
-}
-
-
-func buildComparerByLoad () func(*interface{}) bool {
-    
-    
-    return func (item *interface{}) bool {
-        
-        return item.currentLoad.Value < utils.MAX_SERVICE_CAPACITY
-    }
-}
-
-
-func GetLoadBalancer() *loadBalancer {
+func GetLoadBalancer(wg *sync.WaitGroup) *loadBalancer {
     
     if loadBalancerInstance == nil {
         loadBalancerInstance = &loadBalancer {
             services: make([]*service, 0, 0),
+            syncGroup: wg,
         }
     }
     
@@ -52,12 +35,15 @@ func (balancerInstance *loadBalancer) AddService (service *service) {
 
 
 func (balancerInstance *loadBalancer) RemoveService (serviceId uint) {
-    var index, wasIndexFound = utils.FindIndexBy(
-        balancerInstance.services,
-        buildComparerById(serviceId),
+    var index = sort.Search(
+        -1,
+        func (i int) bool {
+            
+            return balancerInstance.services[i].Id == serviceId
+        },
     )
     
-    if wasIndexFound {
+    if index >= 0 && len(balancerInstance.services) > 0 {
         balancerInstance.services = append(
             balancerInstance.services[ : index],
             balancerInstance.services[index + 1 : ]...
@@ -67,10 +53,15 @@ func (balancerInstance *loadBalancer) RemoveService (serviceId uint) {
 
 
 func (balancerInstance *loadBalancer) getNextFreeServer() *service {
-    var index, wasIndexFound = utils.FindIndexBy(balancerInstance.services, buildComparerByLoad())
+    var index = sort.Search(
+        -1,
+        func (i int) bool {
+            
+            return balancerInstance.services[i].currentLoad.Value < utils.MAX_SERVICE_CAPACITY
+        },
+    )
     
-    if wasIndexFound {
-        
+    if index >= 0 && len(balancerInstance.services) > 0 {
         return balancerInstance.services[index]
     }
     
@@ -82,10 +73,10 @@ func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
     server := balancerInstance.getNextFreeServer()
     
     if server == nil {
-        server := NewService()
+        server := NewService(balancerInstance.syncGroup)
         balancerInstance.AddService(server)
         server.AddRequest(clientRequest)
+    } else {
+        server.AddRequest(clientRequest)
     }
-    
-    server.AddRequest(clientRequest)
 }
