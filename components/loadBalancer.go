@@ -1,7 +1,6 @@
 package components
 
 import (
-    "phoenix/utils"
     "sort"
     "sync"
 )
@@ -43,7 +42,7 @@ func (balancerInstance *loadBalancer) RemoveService (serviceId uint) {
         },
     )
     
-    if index >= 0 && len(balancerInstance.services) > 0 {
+    if index >= 0 && len(balancerInstance.services) > 1 {
         balancerInstance.services = append(
             balancerInstance.services[ : index],
             balancerInstance.services[index + 1 : ]...
@@ -57,7 +56,7 @@ func (balancerInstance *loadBalancer) getNextFreeServer() *service {
         -1,
         func (i int) bool {
             
-            return balancerInstance.services[i].currentLoad.Value < utils.MAX_SERVICE_CAPACITY
+            return balancerInstance.services[i].HasRoom()
         },
     )
     
@@ -70,13 +69,13 @@ func (balancerInstance *loadBalancer) getNextFreeServer() *service {
 
 
 func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
-    server := balancerInstance.getNextFreeServer()
+    var server = balancerInstance.getNextFreeServer()
     
     if server == nil {
-        server := NewService(balancerInstance.syncGroup)
+        server = NewService(balancerInstance.syncGroup)
         balancerInstance.AddService(server)
-        server.AddRequest(clientRequest)
-    } else {
-        server.AddRequest(clientRequest)
     }
+    
+    _ = server.AddRequest(clientRequest)
+    
 }
