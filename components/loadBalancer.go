@@ -1,8 +1,9 @@
 package components
 
 import (
-    "sort"
+    "phoenix/utils"
     "sync"
+    "time"
 )
 
 var loadBalancerInstance *loadBalancer
@@ -10,8 +11,17 @@ var loadBalancerInstance *loadBalancer
 
 type loadBalancer struct {
     Balancer
-    services []*service
+    sync.Mutex
+    services map[int] *service
     syncGroup *sync.WaitGroup
+}
+
+
+func fillLoadBalancer (balancerInstance *loadBalancer) {
+    
+    for i := 0; i < utils.MIN_RUNING_SERVICES; i++ {
+        loadBalancerInstance.AddService(CreateService())
+    }
 }
 
 
@@ -19,63 +29,72 @@ func GetLoadBalancer(wg *sync.WaitGroup) *loadBalancer {
     
     if loadBalancerInstance == nil {
         loadBalancerInstance = &loadBalancer {
-            services: make([]*service, 0, 0),
+            services: make(map[int] *service),
             syncGroup: wg,
         }
+        
+        fillLoadBalancer(loadBalancerInstance)
+        go loadBalancerInstance.removeServices()
     }
     
     return loadBalancerInstance
 }
 
 
-func (balancerInstance *loadBalancer) AddService (service *service) {
-    balancerInstance.services = append(balancerInstance.services, service)
+func (balancerInstance *loadBalancer) AddService (server *service) {
+    loadBalancerInstance.Lock()
+    balancerInstance.services[server.Id] = server
+    loadBalancerInstance.Unlock()
 }
 
 
-func (balancerInstance *loadBalancer) RemoveService (serviceId uint) {
-    var index = sort.Search(
-        -1,
-        func (i int) bool {
-            
-            return balancerInstance.services[i].Id == serviceId
-        },
-    )
+func (balancerInstance *loadBalancer) RemoveService (serviceId int) {
     
-    if index >= 0 && len(balancerInstance.services) > 1 {
-        balancerInstance.services = append(
-            balancerInstance.services[ : index],
-            balancerInstance.services[index + 1 : ]...
-        )
+    if balancerInstance.services[serviceId].IsIdle() &&
+            len(balancerInstance.services) > utils.MIN_RUNING_SERVICES {
+        delete(balancerInstance.services, serviceId)
     }
 }
 
 
-func (balancerInstance *loadBalancer) getNextFreeServer() *service {
-    var index = sort.Search(
-        -1,
-        func (i int) bool {
-            
-            return balancerInstance.services[i].HasRoom()
-        },
-    )
+func (balancerInstance *loadBalancer) removeServices () {
     
-    if index >= 0 && len(balancerInstance.services) > 0 {
-        return balancerInstance.services[index]
+    for true {
+        time.Sleep(time.Second)
+        loadBalancerInstance.Lock()
+        
+        for serverId := range balancerInstance.services {
+            balancerInstance.RemoveService(serverId)
+        }
+        
+        loadBalancerInstance.Unlock()
+    }
+}
+
+
+func (balancerInstance *loadBalancer) getNextFreeServerId() (int, bool) {
+    
+    for index := range balancerInstance.services {
+        
+        if balancerInstance.services[index].HasRoom() {
+            
+            return index, true
+        }
     }
     
-    return nil
+    return -1, false
 }
 
 
 func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
-    var server = balancerInstance.getNextFreeServer()
+    var serverId, wasFound = balancerInstance.getNextFreeServerId()
     
-    if server == nil {
-        server = NewService(balancerInstance.syncGroup)
+    if !wasFound {
+        var server = CreateService()
+        serverId = server.Id
         balancerInstance.AddService(server)
     }
     
-    _ = server.AddRequest(clientRequest)
-    
+    balancerInstance.syncGroup.Add(1)
+    go balancerInstance.services[serverId].AddRequest(clientRequest, balancerInstance.syncGroup)
 }

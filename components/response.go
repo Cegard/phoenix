@@ -6,12 +6,13 @@ import (
 
 
 type Response struct {
+    ServiceId int
     StatusCode uint
     Message string
 }
 
 
-func CreateResponse (code uint) *Response {
+func CreateResponse (code uint, serviceId int) *Response {
     var message string
     
     if code == utils.SUCCEEDED_STATUS {
@@ -21,6 +22,7 @@ func CreateResponse (code uint) *Response {
     }
     
     return &Response {
+        ServiceId: serviceId,
         StatusCode: code,
         Message: message,
     }
