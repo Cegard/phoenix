@@ -4,6 +4,7 @@ import (
     "phoenix/utils"
     "sync"
     "time"
+    "fmt"
 )
 
 var loadBalancerInstance *loadBalancer
@@ -12,8 +13,8 @@ var loadBalancerInstance *loadBalancer
 type loadBalancer struct {
     Balancer
     sync.Mutex
+    SyncGroup *sync.WaitGroup
     services map[int] *service
-    syncGroup *sync.WaitGroup
 }
 
 
@@ -21,19 +22,19 @@ func fillLoadBalancer (balancerInstance *loadBalancer) {
     balancerInstance.Lock()
     
     for i := 0; i < utils.MIN_RUNING_SERVICES; i++ {
-        loadBalancerInstance.addService(CreateService(balancerInstance.syncGroup))
+        loadBalancerInstance.addService(CreateService(balancerInstance.SyncGroup))
     }
     
     balancerInstance.Unlock()
 }
 
 
-func GetLoadBalancer(wg *sync.WaitGroup) *loadBalancer {
+func GetLoadBalancer() *loadBalancer {
     
     if loadBalancerInstance == nil {
         loadBalancerInstance = &loadBalancer {
             services: make(map[int] *service),
-            syncGroup: wg,
+            SyncGroup: &sync.WaitGroup{},
         }
         
         fillLoadBalancer(loadBalancerInstance)
@@ -93,7 +94,7 @@ func (balancerInstance *loadBalancer) assignRequest (clientRequest *request) boo
     var serverId, wasFound = balancerInstance.getNextFreeServerId()
     
     if !wasFound {
-        var server = CreateService(balancerInstance.syncGroup)
+        var server = CreateService(balancerInstance.SyncGroup)
         serverId = server.Id
         balancerInstance.addService(server)
     }
@@ -102,9 +103,28 @@ func (balancerInstance *loadBalancer) assignRequest (clientRequest *request) boo
 }
 
 
-func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
+func (balancerInstance *loadBalancer) tryToAssignRequest (clientRequest *request) {
     
     if !balancerInstance.assignRequest(clientRequest) {
         balancerInstance.AssignRequest(clientRequest)
     }
+}
+
+
+func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
+    go balancerInstance.tryToAssignRequest(clientRequest)
+}
+
+
+func (balancerInstance *loadBalancer) PrintStatus() {
+    fmt.Printf("\n\nTotal running services: %d\n\n", len(balancerInstance.services))
+    
+    for index := range balancerInstance.services {
+        fmt.Printf("%s", balancerInstance.services[index])
+    }
+}
+
+
+func (balancerInstance *loadBalancer) PrintServiceStatus(serviceId int) {
+    fmt.Printf("%s", balancerInstance.services[serviceId])
 }
