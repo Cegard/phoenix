@@ -18,10 +18,13 @@ type loadBalancer struct {
 
 
 func fillLoadBalancer (balancerInstance *loadBalancer) {
+    balancerInstance.Lock()
     
     for i := 0; i < utils.MIN_RUNING_SERVICES; i++ {
-        loadBalancerInstance.addService(CreateService())
+        loadBalancerInstance.addService(CreateService(balancerInstance.syncGroup))
     }
+    
+    balancerInstance.Unlock()
 }
 
 
@@ -42,9 +45,7 @@ func GetLoadBalancer(wg *sync.WaitGroup) *loadBalancer {
 
 
 func (balancerInstance *loadBalancer) addService (server *service) {
-    loadBalancerInstance.Lock()
     balancerInstance.services[server.Id] = server
-    loadBalancerInstance.Unlock()
 }
 
 
@@ -86,15 +87,24 @@ func (balancerInstance *loadBalancer) getNextFreeServerId() (int, bool) {
 }
 
 
-func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
+func (balancerInstance *loadBalancer) assignRequest (clientRequest *request) bool {
+    defer balancerInstance.Unlock()
+    balancerInstance.Lock()
     var serverId, wasFound = balancerInstance.getNextFreeServerId()
     
     if !wasFound {
-        var server = CreateService()
+        var server = CreateService(balancerInstance.syncGroup)
         serverId = server.Id
         balancerInstance.addService(server)
     }
     
-    balancerInstance.syncGroup.Add(1)
-    go balancerInstance.services[serverId].AddRequest(clientRequest, balancerInstance.syncGroup)
+    return balancerInstance.services[serverId].AddRequest(clientRequest)
+}
+
+
+func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
+    
+    if !balancerInstance.assignRequest(clientRequest) {
+        balancerInstance.AssignRequest(clientRequest)
+    }
 }

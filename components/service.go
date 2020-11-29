@@ -13,7 +13,6 @@ type service struct {
     Id int
     currentLoad *Load
     syncGroup *sync.WaitGroup
-    channel chan int
 }
 
 
@@ -26,19 +25,22 @@ func (server *service) processRequest (clientRequest *request) {
         clientRequest.Client.SetResponse(CreateResponse(utils.FAILED_STATUS, server.Id))
     }
     
-    server.channel <- server.Id
     server.currentLoad.DecreaseLoad()
     server.syncGroup.Done()
 }
 
 
-func (server *service) AddRequest (clientRequest *request, mainSyncGroup *sync.WaitGroup) int {
-    defer mainSyncGroup.Done()
-    server.currentLoad.IncreaseLoad()
-    server.syncGroup.Add(1)
-    go server.processRequest(clientRequest)
+func (server *service) AddRequest (clientRequest *request) bool {
     
-    return <- server.channel
+    if server.HasRoom() {
+        server.currentLoad.IncreaseLoad()
+        server.syncGroup.Add(1)
+        go server.processRequest(clientRequest)
+        
+        return true
+    }
+    
+    return false
 }
 
 
@@ -54,13 +56,12 @@ func (server *service) IsIdle() bool {
 }
 
 
-func CreateService() *service {
+func CreateService(mainWaitGroup *sync.WaitGroup) *service {
     currentCount++
     
     return &service {
         Id: currentCount,
         currentLoad: new(Load),
-        syncGroup: new(sync.WaitGroup),
-        channel: make(chan int, utils.MAX_SERVICE_CAPACITY),
+        syncGroup: mainWaitGroup,
     }
 }
