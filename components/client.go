@@ -1,13 +1,9 @@
 package components
 
-import (
-    "fmt"
-)
-
 
 type Client struct {
     Id int
-    serverResponse *Response
+    ServerResponses []*Response
 }
 
 
@@ -18,6 +14,14 @@ func (client *Client) MakeRequest () *request {
 
 
 func (client *Client) SetResponse (response *Response) {
-    client.serverResponse = response
-    fmt.Println(*client.serverResponse)
+    client.ServerResponses = append(client.ServerResponses, response)
+}
+
+
+func CreateClient (id int) *Client {
+    
+    return &Client{
+        Id: id,
+        ServerResponses: make([]*Response, 0),
+    }
 }
