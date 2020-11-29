@@ -1,7 +1,12 @@
 package components
 
+import (
+    "sync"
+)
+
 
 type Client struct {
+    sync.Mutex
     Id int
     ServerResponses []*Response
 }
@@ -14,7 +19,9 @@ func (client *Client) MakeRequest () *request {
 
 
 func (client *Client) SetResponse (response *Response) {
+    client.Lock()
     client.ServerResponses = append(client.ServerResponses, response)
+    client.Unlock()
 }
 
 

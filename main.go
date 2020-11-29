@@ -9,15 +9,22 @@ import (
 
 
 func main() {
-    var loadBalancer = components.GetLoadBalancer()
     var client = components.CreateClient(1)
     var hasUserStopped bool
     var in = bufio.NewScanner(os.Stdin)
     
     for !hasUserStopped {
-        hasUserStopped = components.ProcessUserCommands(client, loadBalancer, in) 
+        fmt.Println("Enter a command:")
+        fmt.Printf(">: ")
+        in.Scan()
+        
+        if in.Text() == "exit" {
+            hasUserStopped = true
+        } else {
+            components.ProcessUserCommands(client, in.Text()) 
+        }
     }
     
     fmt.Println("Waiting for remaining processes to finish...")
-    loadBalancer.SyncGroup.Wait()
+    components.GetLoadBalancer().SyncGroup.Wait()
 }
