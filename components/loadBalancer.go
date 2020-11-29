@@ -20,7 +20,7 @@ type loadBalancer struct {
 func fillLoadBalancer (balancerInstance *loadBalancer) {
     
     for i := 0; i < utils.MIN_RUNING_SERVICES; i++ {
-        loadBalancerInstance.AddService(CreateService())
+        loadBalancerInstance.addService(CreateService())
     }
 }
 
@@ -34,40 +34,40 @@ func GetLoadBalancer(wg *sync.WaitGroup) *loadBalancer {
         }
         
         fillLoadBalancer(loadBalancerInstance)
-        go loadBalancerInstance.removeServices()
+        go loadBalancerInstance.removeServicesContinously()
     }
     
     return loadBalancerInstance
 }
 
 
-func (balancerInstance *loadBalancer) AddService (server *service) {
+func (balancerInstance *loadBalancer) addService (server *service) {
     loadBalancerInstance.Lock()
     balancerInstance.services[server.Id] = server
     loadBalancerInstance.Unlock()
 }
 
 
-func (balancerInstance *loadBalancer) RemoveService (serviceId int) {
+func (balancerInstance *loadBalancer) removeIdleServices () {
+    loadBalancerInstance.Lock()
     
-    if balancerInstance.services[serviceId].IsIdle() &&
-            len(balancerInstance.services) > utils.MIN_RUNING_SERVICES {
-        delete(balancerInstance.services, serviceId)
+    for serviceId := range balancerInstance.services {
+        
+        if balancerInstance.services[serviceId].IsIdle() &&
+                len(balancerInstance.services) > utils.MIN_RUNING_SERVICES {
+            delete(balancerInstance.services, serviceId)
+        }
     }
+    
+    loadBalancerInstance.Unlock()
 }
 
 
-func (balancerInstance *loadBalancer) removeServices () {
+func (balancerInstance *loadBalancer) removeServicesContinously () {
     
     for true {
         time.Sleep(time.Second)
-        loadBalancerInstance.Lock()
-        
-        for serverId := range balancerInstance.services {
-            balancerInstance.RemoveService(serverId)
-        }
-        
-        loadBalancerInstance.Unlock()
+        balancerInstance.removeIdleServices()
     }
 }
 
@@ -92,7 +92,7 @@ func (balancerInstance *loadBalancer) AssignRequest (clientRequest *request) {
     if !wasFound {
         var server = CreateService()
         serverId = server.Id
-        balancerInstance.AddService(server)
+        balancerInstance.addService(server)
     }
     
     balancerInstance.syncGroup.Add(1)
