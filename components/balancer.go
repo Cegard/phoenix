@@ -2,7 +2,7 @@ package components
 
 
 type Balancer interface {
-    AddService (*service)
-    RemoveService (int)
+    addService (*service)
+    removeIdleServices()
     AssignRequest (*request) *Response
 }
