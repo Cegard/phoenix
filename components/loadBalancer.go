@@ -125,6 +125,6 @@ func (balancerInstance *loadBalancer) PrintStatus() {
 }
 
 
-func (balancerInstance *loadBalancer) PrintServiceStatus(serviceId int) {
+func (balancerInstance *loadBalancer) PrintServiceStatus (serviceId int) {
     fmt.Printf("%s", balancerInstance.services[serviceId])
 }

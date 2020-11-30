@@ -12,7 +12,7 @@ type Client struct {
 }
 
 
-func (client *Client) MakeRequest () *request {
+func (client *Client) MakeRequest() *request {
     
     return NewRequest(client)
 }

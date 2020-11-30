@@ -54,8 +54,6 @@ func TestServerInstanceDynamicRemoval (t *testing.T) {
     var client = CreateClient(0)
     var loadBalancer = GetLoadBalancer()
     
-    time.Sleep(1 + time.Second * time.Duration(utils.MAX_PROCESS_TIME))
-    
     for i := 0; i < (utils.MIN_RUNING_SERVICES * utils.MAX_SERVICE_CAPACITY * 2); i++ {
         loadBalancer.AssignRequest(client.MakeRequest())
     }
