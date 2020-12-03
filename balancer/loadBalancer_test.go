@@ -36,7 +36,7 @@ func TestServerInstanceCreation (t *testing.T) {
 
 
 func TestServerInstanceDynamicCreation (t *testing.T) {
-    var client = cient.CreateClient(0)
+    var client = client.NewClient(0)
     
     for i := 0; i < (utils.MIN_RUNING_SERVICES * utils.MAX_SERVICE_CAPACITY * 2); i++ {
         GetLoadBalancer().AssignRequest(client.MakeRequest())
@@ -49,7 +49,7 @@ func TestServerInstanceDynamicCreation (t *testing.T) {
 
 
 func TestServerInstanceDynamicRemoval (t *testing.T) {
-    var client = cient.CreateClient(0)
+    var client = client.NewClient(0)
     
     for i := 0; i < (utils.MIN_RUNING_SERVICES * utils.MAX_SERVICE_CAPACITY * 2); i++ {
         GetLoadBalancer().AssignRequest(client.MakeRequest())

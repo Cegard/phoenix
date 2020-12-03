@@ -20,7 +20,7 @@ func TestProcessSendCommand (t *testing.T) {
     
     ProcessUserCommands(client, command)
     
-    if len(balancer.GetLoadBalancer().services) < requestsCoef {
+    if balancer.GetLoadBalancer().TotalRunningInstances() < requestsCoef {
         t.Errorf("Load balancer is not processing the requests")
     }
 }
