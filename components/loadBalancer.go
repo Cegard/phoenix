@@ -11,7 +11,6 @@ var loadBalancerInstance *loadBalancer
 
 
 type loadBalancer struct {
-    Balancer
     sync.Mutex
     SyncGroup *sync.WaitGroup
     services map[int] *service
