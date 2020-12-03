@@ -1,23 +1,25 @@
-package components
+package ui
 
 import (
+    "phoenix/client"
+    "phoenix/balancer"
     "fmt"
     "strconv"
     "strings"
 )
 
 
-func sendRequests(client *Client, requestsNumber int) {
+func sendRequests(client *client.Client, requestsNumber int) {
     
     for index := 0; index < requestsNumber ; index++ {
         
-        GetLoadBalancer().AssignRequest(client.MakeRequest())
+        balancer.GetLoadBalancer().AssignRequest(client.MakeRequest())
     }
 }
 
 
-func ProcessUserCommands(client *Client, command string) {
-    input := strings.Split(command, " ")
+func ProcessUserCommands(client *client.Client, command string) {
+    var input = strings.Split(command, " ")
     
     switch input[0] {
         
@@ -27,11 +29,11 @@ func ProcessUserCommands(client *Client, command string) {
         
         case "serverStatus":
             fmt.Printf("\nProcessed requests so far: %d\n", len(client.ServerResponses))
-            GetLoadBalancer().PrintStatus()
+            balancer.GetLoadBalancer().PrintStatus()
         
         case "serviceStatus":
             serviceId, _ := strconv.Atoi(input[1])
-            GetLoadBalancer().PrintServiceStatus(serviceId)
+            balancer.GetLoadBalancer().PrintServiceStatus(serviceId)
         
         default:
             fmt.Printf("Command not recognized\n")

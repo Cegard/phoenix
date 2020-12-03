@@ -1,4 +1,4 @@
-package components
+package messages
 
 import (
     "phoenix/utils"
@@ -6,16 +6,16 @@ import (
 )
 
 
-type request struct {
+type Request struct {
+    RespondTo func(*Response)
     TimeToProcess time.Duration
-    Client *Client
 }
 
 
-func NewRequest(client *Client) *request {
+func NewRequest(respondTo func(*Response) ) *Request {
     
-    return &request {
-        Client: client,
+    return &Request {
+        RespondTo: respondTo,
         TimeToProcess: time.Duration(utils.RandomInt(
             utils.MIN_PROCESS_TIME,
             utils.MAX_PROCESS_TIME),

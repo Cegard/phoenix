@@ -1,6 +1,7 @@
-package components
+package server
 
 import (
+    "phoenix/client"
     "phoenix/utils"
     "testing"
     "sync"
@@ -9,9 +10,9 @@ import (
 
 
 func TestProcessRequest (t *testing.T) {
-    var client = CreateClient(0)
+    var client = client.NewClient(0)
     var wg sync.WaitGroup
-    var service = CreateService(&wg)
+    var service = NewService(&wg)
     
     wg.Add(1)
     service.processRequest(client.MakeRequest())
@@ -23,9 +24,9 @@ func TestProcessRequest (t *testing.T) {
 
 
 func TestServerLoadIncreases (t *testing.T) {
-    var client = CreateClient(0)
+    var client = client.NewClient(0)
     var wg sync.WaitGroup
-    var service = CreateService(&wg)
+    var service = NewService(&wg)
     
     wg.Add(1)
     service.AddRequest(client.MakeRequest())
@@ -37,9 +38,9 @@ func TestServerLoadIncreases (t *testing.T) {
 
 
 func TestServerLoadDecreases (t *testing.T) {
-    var client = CreateClient(0)
+    var client = client.NewClient(0)
     var wg sync.WaitGroup
-    var service = CreateService(&wg)
+    var service = NewService(&wg)
     
     wg.Add(1)
     service.AddRequest(client.MakeRequest())
@@ -53,9 +54,9 @@ func TestServerLoadDecreases (t *testing.T) {
 
 
 func TestServerUpdatesHistory (t *testing.T) {
-    var client = CreateClient(0)
+    var client = client.NewClient(0)
     var wg sync.WaitGroup
-    var service = CreateService(&wg)
+    var service = NewService(&wg)
     
     wg.Add(1)
     service.AddRequest(client.MakeRequest())

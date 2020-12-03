@@ -1,4 +1,4 @@
-package components
+package messages
 
 import (
     "phoenix/utils"
@@ -12,7 +12,7 @@ type Response struct {
 }
 
 
-func CreateResponse (code uint, serviceId int) *Response {
+func NewResponse (code uint, serviceId int) *Response {
     var message string
     
     if code == utils.SUCCEEDED_STATUS {

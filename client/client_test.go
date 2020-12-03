@@ -1,4 +1,4 @@
-package components
+package client
 
 import (
     "testing"
@@ -7,7 +7,7 @@ import (
 
 func TestClientCreation (t *testing.T) {
     var clientId = 0
-    var client = CreateClient(clientId)
+    var client = NewClient(clientId)
     
     if client.Id != clientId {
         t.Errorf("Client is not being created")

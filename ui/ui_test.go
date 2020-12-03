@@ -1,6 +1,8 @@
-package components
+package ui
 
 import (
+    "phoenix/balancer"
+    "phoenix/client"
     "phoenix/utils"
     "testing"
     "time"
@@ -9,7 +11,7 @@ import (
 
 
 func TestProcessSendCommand (t *testing.T) {
-    var client = CreateClient(0)
+    var client = client.NewClient(0)
     var requestsCoef = 10
     var requests = requestsCoef * utils.MAX_SERVICE_CAPACITY
     var command = fmt.Sprintf("send %d", requests)
@@ -18,7 +20,7 @@ func TestProcessSendCommand (t *testing.T) {
     
     ProcessUserCommands(client, command)
     
-    if len(GetLoadBalancer().services) < requestsCoef {
+    if len(balancer.GetLoadBalancer().services) < requestsCoef {
         t.Errorf("Load balancer is not processing the requests")
     }
 }

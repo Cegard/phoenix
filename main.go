@@ -1,30 +1,32 @@
 package main
 
 import (
-    "phoenix/components"
+    "phoenix/balancer"
+    "phoenix/client"
+    "phoenix/ui"
+    "bufio"
     "fmt"
     "os"
-    "bufio"
 )
 
 
 func main() {
-    var client = components.CreateClient(1)
+    var client = client.NewClient(1)
     var hasUserStopped bool
-    var in = bufio.NewScanner(os.Stdin)
+    var scanner = bufio.NewScanner(os.Stdin)
     
     for !hasUserStopped {
         fmt.Println("Enter a command:")
         fmt.Printf(">: ")
-        in.Scan()
+        scanner.Scan()
         
-        if in.Text() == "exit" {
+        if scanner.Text() == "exit" {
             hasUserStopped = true
         } else {
-            components.ProcessUserCommands(client, in.Text()) 
+            ui.ProcessUserCommands(client, scanner.Text()) 
         }
     }
     
     fmt.Println("Waiting for remaining processes to finish...")
-    components.GetLoadBalancer().SyncGroup.Wait()
+    balancer.GetLoadBalancer().SyncGroup.Wait()
 }
