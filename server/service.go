@@ -15,8 +15,8 @@ type Service struct {
     Id int
     currentLoad *utils.Load
     syncGroup *sync.WaitGroup
-    successRequests uint
-    failedRequests uint
+    successRequests *utils.Load
+    failedRequests *utils.Load
 }
 
 
@@ -24,10 +24,10 @@ func (server *Service) processRequest (request *messages.Request) {
     time.Sleep(time.Second * request.TimeToProcess)
     
     if utils.RandomFloat() <= utils.SuccessProbability {
-        server.successRequests++
+        server.successRequests.IncreaseLoad()
         request.RespondTo(messages.NewResponse(utils.SucceededStatus, server.Id))
     } else {
-        server.failedRequests++
+        server.failedRequests.IncreaseLoad()
         request.RespondTo(messages.NewResponse(utils.FailedStatus, server.Id))
     }
     
@@ -69,6 +69,8 @@ func NewService(mainWaitGroup *sync.WaitGroup) *Service {
         Id: currentCount,
         currentLoad: &utils.Load{},
         syncGroup: mainWaitGroup,
+        successRequests: &utils.Load{},
+        failedRequests: &utils.Load{},
     }
 }
 
@@ -79,8 +81,10 @@ func (server *Service) String() string {
         "Service: %d\n -- Currently processing: %d\n -- Total processed requests: %d\n -- Succeeded: %d\n -- Failed: %d\n\n",
         server.Id,
         server.currentLoad.GetValue(),
-        server.successRequests + server.failedRequests,
-        server.successRequests,
-        server.failedRequests,
+        server.successRequests.GetValue() + server.failedRequests.GetValue(),
+        server.successRequests.GetValue(),
+        server.successRequests.GetValue() /
+            (server.successRequests.GetValue() + server.failedRequests.GetValue()),
+        server.failedRequests.GetValue(),
     )
 }

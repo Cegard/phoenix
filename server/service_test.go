@@ -62,7 +62,7 @@ func TestServerUpdatesHistory (t *testing.T) {
     service.AddRequest(client.MakeRequest())
     time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
-    if service.successRequests + service.failedRequests < 1 {
+    if service.successRequests.GetValue() + service.failedRequests.GetValue() < 1 {
         t.Errorf("Service is not updating it's history")
     }
 }

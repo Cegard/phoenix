@@ -15,13 +15,7 @@ type Client struct {
 
 func (client *Client) MakeRequest() *messages.Request {
     
-    
-    var respondToThis = func (response *messages.Response) {
-        client.ServerResponses = append(client.ServerResponses, response)
-    }
-    
-    
-    return messages.NewRequest(respondToThis)
+    return messages.NewRequest(client.SetResponse)
 }
 
 

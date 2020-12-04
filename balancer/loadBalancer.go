@@ -22,8 +22,8 @@ type LoadBalancer struct {
 func fillLoadBalancer (balancer *LoadBalancer) {
     balancer.Lock()
     
-    for i := 0; i < utils.MinRunningServices; i++ {
-        loadBalancerInstance.addService(server.NewService(balancer.SyncGroup))
+    for id := 0; id < utils.MinRunningServices; id++ {
+        balancer.services[id] = server.NewService(balancer.SyncGroup)
     }
     
     balancer.Unlock()
@@ -43,11 +43,6 @@ func GetLoadBalancer() *LoadBalancer {
     }
     
     return loadBalancerInstance
-}
-
-
-func (balancer *LoadBalancer) addService (server *server.Service) {
-    balancer.services[server.Id] = server
 }
 
 
@@ -97,7 +92,7 @@ func (balancer *LoadBalancer) assignRequest (request *messages.Request) bool {
     if !wasFound {
         var server = server.NewService(balancer.SyncGroup)
         serverId = server.Id
-        balancer.addService(server)
+        balancer.services[server.Id] = server
     }
     
     return balancer.services[serverId].AddRequest(request)
