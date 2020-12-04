@@ -13,14 +13,29 @@ var currentCount int = 0
 
 type Service struct {
     Id int
-    currentLoad *utils.Load
+    IsAlive bool
+    currentLoad *Load
     syncGroup *sync.WaitGroup
-    successRequests *utils.Load
-    failedRequests *utils.Load
+    successRequests *Load
+    failedRequests *Load
 }
 
 
-func (server *Service) processRequest (request *messages.Request) {
+func NewService(mainWaitGroup *sync.WaitGroup) *Service {
+    currentCount++
+    
+    return &Service {
+        Id: currentCount,
+        IsAlive: true,
+        currentLoad: &Load{},
+        syncGroup: mainWaitGroup,
+        successRequests: &Load{},
+        failedRequests: &Load{},
+    }
+}
+
+
+func (server *Service) processRequest (request *messages.Request, register func(int, string)) {
     time.Sleep(time.Second * request.TimeToProcess)
     
     if utils.RandomFloat() <= utils.SuccessProbability {
@@ -32,16 +47,18 @@ func (server *Service) processRequest (request *messages.Request) {
     }
     
     server.currentLoad.DecreaseLoad()
+    register(server.Id, fmt.Sprintf("%s", server))
     server.syncGroup.Done()
 }
 
 
-func (server *Service) AddRequest (request *messages.Request) bool {
+func (server *Service) AddRequest (request *messages.Request, register func(int, string)) bool {
     
     if server.HasRoom() {
         server.currentLoad.IncreaseLoad()
+        register(server.Id, fmt.Sprintf("%s", server))
         server.syncGroup.Add(1)
-        go server.processRequest(request)
+        go server.processRequest(request, register)
         
         return true
     }
@@ -62,29 +79,26 @@ func (server *Service) IsIdle() bool {
 }
 
 
-func NewService(mainWaitGroup *sync.WaitGroup) *Service {
-    currentCount++
-    
-    return &Service {
-        Id: currentCount,
-        currentLoad: &utils.Load{},
-        syncGroup: mainWaitGroup,
-        successRequests: &utils.Load{},
-        failedRequests: &utils.Load{},
-    }
-}
-
-
 func (server *Service) String() string {
+    var successRate = 0.0
+    var totalRequests = (server.successRequests.GetValue() + server.failedRequests.GetValue())
+    
+    if totalRequests == 0 {
+        successRate = 1.0
+    } else {
+        successRate = float64(server.successRequests.GetValue()) / float64(totalRequests)
+    }
     
     return fmt.Sprintf(
-        "Service: %d\n -- Currently processing: %d\n -- Total processed requests: %d\n -- Succeeded: %d\n -- Failed: %d\n\n",
+        "Service: %d\n -- Currently processing: %d\n -- Is alive: %t\n" +
+                " -- Total processed requests: %d\n -- Succeeded: %d\n -- Failed: %d\n" +
+                " -- Success rate: %f\n\n",
         server.Id,
         server.currentLoad.GetValue(),
+        server.IsAlive,
         server.successRequests.GetValue() + server.failedRequests.GetValue(),
         server.successRequests.GetValue(),
-        server.successRequests.GetValue() /
-            (server.successRequests.GetValue() + server.failedRequests.GetValue()),
         server.failedRequests.GetValue(),
+        successRate,
     )
 }
