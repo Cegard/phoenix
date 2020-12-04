@@ -117,17 +117,20 @@ func (balancer *LoadBalancer) AssignRequest (request *messages.Request) {
 }
 
 
-func (balancer *LoadBalancer) PrintStatus() {
-    fmt.Printf("\n\nTotal running services: %d\n\n", len(balancer.services))
+func (balancer *LoadBalancer) GetStatus() string {
+    var status = fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services))
     
     for index := range balancer.services {
-        fmt.Printf("%s", balancer.services[index])
+        status += fmt.Sprintf("%s", balancer.services[index])
     }
+    
+    return status
 }
 
 
-func (balancer *LoadBalancer) PrintServiceStatus (serviceId int) {
-    fmt.Printf("%s", balancer.services[serviceId])
+func (balancer *LoadBalancer) GetServiceStatus (serviceId int) string {
+    
+    return fmt.Sprintf("%s", balancer.services[serviceId])
 }
 
 

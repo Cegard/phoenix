@@ -23,7 +23,13 @@ func main() {
         if scanner.Text() == "exit" {
             hasUserStopped = true
         } else {
-            ui.ProcessUserCommands(client, scanner.Text()) 
+            var message, err = ui.ProcessUserCommands(client, scanner.Text())
+            
+            if err == nil {
+                fmt.Println(message)
+            } else {
+                fmt.Println(fmt.Errorf("%w", err))
+            }
         }
     }
     
