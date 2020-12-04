@@ -29,7 +29,7 @@ func TestGetLoadBalancer (t *testing.T) {
 
 func TestServerInstanceCreation (t *testing.T) {
     
-    if GetLoadBalancer().TotalRunningInstances() < utils.MIN_RUNING_SERVICES {
+    if GetLoadBalancer().TotalRunningInstances() < utils.MinRunningServices {
         t.Errorf("Live services doesn't match min requirements\n")
     }
 }
@@ -38,11 +38,11 @@ func TestServerInstanceCreation (t *testing.T) {
 func TestServerInstanceDynamicCreation (t *testing.T) {
     var client = client.NewClient(0)
     
-    for i := 0; i < (utils.MIN_RUNING_SERVICES * utils.MAX_SERVICE_CAPACITY * 2); i++ {
+    for i := 0; i < (utils.MinRunningServices * utils.MaxServiceCapacity * 2); i++ {
         GetLoadBalancer().AssignRequest(client.MakeRequest())
     }
     
-    if GetLoadBalancer().TotalRunningInstances() != utils.MIN_RUNING_SERVICES * 2 {
+    if GetLoadBalancer().TotalRunningInstances() != utils.MinRunningServices * 2 {
         t.Errorf("Load Balancer instance not scaling up\n")
     }
 }
@@ -51,13 +51,13 @@ func TestServerInstanceDynamicCreation (t *testing.T) {
 func TestServerInstanceDynamicRemoval (t *testing.T) {
     var client = client.NewClient(0)
     
-    for i := 0; i < (utils.MIN_RUNING_SERVICES * utils.MAX_SERVICE_CAPACITY * 2); i++ {
+    for i := 0; i < (utils.MinRunningServices * utils.MaxServiceCapacity * 2); i++ {
         GetLoadBalancer().AssignRequest(client.MakeRequest())
     }
     
-    time.Sleep(1 + time.Second * time.Duration(utils.MAX_PROCESS_TIME))
+    time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
-    if GetLoadBalancer().TotalRunningInstances() != utils.MIN_RUNING_SERVICES {
+    if GetLoadBalancer().TotalRunningInstances() != utils.MinRunningServices {
         t.Errorf("Load Balancer instance not scaling down\n")
     }
 }

@@ -23,12 +23,12 @@ type Service struct {
 func (server *Service) processRequest (request *messages.Request) {
     time.Sleep(time.Second * request.TimeToProcess)
     
-    if utils.RandomFloat() <= utils.SUCCESS_PROBABILITY {
+    if utils.RandomFloat() <= utils.SuccessProbability {
         server.successRequests++
-        request.RespondTo(messages.NewResponse(utils.SUCCEEDED_STATUS, server.Id))
+        request.RespondTo(messages.NewResponse(utils.SucceededStatus, server.Id))
     } else {
         server.failedRequests++
-        request.RespondTo(messages.NewResponse(utils.FAILED_STATUS, server.Id))
+        request.RespondTo(messages.NewResponse(utils.FailedStatus, server.Id))
     }
     
     server.currentLoad.DecreaseLoad()
@@ -52,7 +52,7 @@ func (server *Service) AddRequest (request *messages.Request) bool {
 
 func (server *Service) HasRoom() bool {
     
-    return server.currentLoad.GetValue() < utils.MAX_SERVICE_CAPACITY
+    return server.currentLoad.GetValue() < utils.MaxServiceCapacity
 }
 
 

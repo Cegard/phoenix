@@ -16,7 +16,7 @@ func main() {
     var scanner = bufio.NewScanner(os.Stdin)
     
     for !hasUserStopped {
-        fmt.Println("Enter a command:")
+        fmt.Printf("\nEnter a command:\n")
         fmt.Printf(">: ")
         scanner.Scan()
         
@@ -33,6 +33,6 @@ func main() {
         }
     }
     
-    fmt.Println("Waiting for remaining processes to finish...")
+    fmt.Printf("\nWaiting for remaining processes to finish...\n")
     balancer.GetLoadBalancer().SyncGroup.Wait()
 }

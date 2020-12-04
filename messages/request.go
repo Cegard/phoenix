@@ -17,8 +17,8 @@ func NewRequest(respondTo func(*Response) ) *Request {
     return &Request {
         RespondTo: respondTo,
         TimeToProcess: time.Duration(utils.RandomInt(
-            utils.MIN_PROCESS_TIME,
-            utils.MAX_PROCESS_TIME),
+            utils.MinProcessTime,
+            utils.MaxProcessTime),
         ),
     }
 }

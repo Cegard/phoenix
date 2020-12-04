@@ -1,12 +1,12 @@
 package utils
 
-const MIN_PROCESS_TIME = 5 // seconds
-const MAX_PROCESS_TIME = 10 //seconds
-const MIN_RUNING_SERVICES = 1
-const MAX_SERVICE_CAPACITY = 10
-const SUCCESS_PROBABILITY float64 = 0.99
+const MinProcessTime = 5 // seconds
+const MaxProcessTime = 10 //seconds
+const MinRunningServices = 1
+const MaxServiceCapacity = 10
+const SuccessProbability float64 = 0.99
 const (
-    WAITING_STATUS uint = iota
-    SUCCEEDED_STATUS
-    FAILED_STATUS    
+    WaitingStatus uint = iota
+    SucceededStatus
+    FailedStatus  
 )

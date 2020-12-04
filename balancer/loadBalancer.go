@@ -22,7 +22,7 @@ type LoadBalancer struct {
 func fillLoadBalancer (balancer *LoadBalancer) {
     balancer.Lock()
     
-    for i := 0; i < utils.MIN_RUNING_SERVICES; i++ {
+    for i := 0; i < utils.MinRunningServices; i++ {
         loadBalancerInstance.addService(server.NewService(balancer.SyncGroup))
     }
     
@@ -57,7 +57,7 @@ func (balancer *LoadBalancer) removeIdleServices () {
     for serviceId := range balancer.services {
         
         if balancer.services[serviceId].IsIdle() &&
-                len(balancer.services) > utils.MIN_RUNING_SERVICES {
+                len(balancer.services) > utils.MinRunningServices {
             delete(balancer.services, serviceId)
         }
     }

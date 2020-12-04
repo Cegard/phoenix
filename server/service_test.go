@@ -45,7 +45,7 @@ func TestServerLoadDecreases (t *testing.T) {
     wg.Add(1)
     service.AddRequest(client.MakeRequest())
     previousProcessingLoad := service.currentLoad.GetValue()
-    time.Sleep(1 + time.Second * time.Duration(utils.MAX_PROCESS_TIME))
+    time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
     if service.currentLoad.GetValue() >= previousProcessingLoad {
         t.Errorf("Service is not decreasing it's load")
@@ -60,7 +60,7 @@ func TestServerUpdatesHistory (t *testing.T) {
     
     wg.Add(1)
     service.AddRequest(client.MakeRequest())
-    time.Sleep(1 + time.Second * time.Duration(utils.MAX_PROCESS_TIME))
+    time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
     if service.successRequests + service.failedRequests < 1 {
         t.Errorf("Service is not updating it's history")

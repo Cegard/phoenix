@@ -15,7 +15,7 @@ type Response struct {
 func NewResponse (code uint, serviceId int) *Response {
     var message string
     
-    if code == utils.SUCCEEDED_STATUS {
+    if code == utils.SucceededStatus {
         message = "Ok."
     } else {
         message = "Oops! Something went wrong."
