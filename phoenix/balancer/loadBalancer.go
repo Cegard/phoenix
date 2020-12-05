@@ -15,6 +15,7 @@ var loadBalancerInstance *LoadBalancer
 type LoadBalancer struct {
     sync.Mutex
     SyncGroup *sync.WaitGroup
+    ServicesIdentifier *utils.Counter
     services map[int] *server.Service
     stats *Info
 }
@@ -26,6 +27,7 @@ func GetLoadBalancer() *LoadBalancer {
         loadBalancerInstance = &LoadBalancer {
             services: make(map[int] *server.Service),
             SyncGroup: &sync.WaitGroup{},
+            ServicesIdentifier: &utils.Counter{},
             stats: NewInfo(),
         }
         
@@ -41,7 +43,8 @@ func fillLoadBalancer (balancer *LoadBalancer) {
     balancer.Lock()
     
     for id := 0; id < utils.MinRunningServices; id++ {
-        var server = server.NewService(balancer.SyncGroup)
+        balancer.ServicesIdentifier.IncreaseCount()
+        var server = server.NewService(balancer.ServicesIdentifier.GetCount(), balancer.SyncGroup)
         balancer.services[server.Id] = server
     }
     
@@ -98,7 +101,8 @@ func (balancer *LoadBalancer) assignRequest (request *messages.Request) bool {
     var serverId, wasFound = balancer.getNextFreeServerId()
     
     if !wasFound {
-        var server = server.NewService(balancer.SyncGroup)
+        balancer.ServicesIdentifier.IncreaseCount()
+        var server = server.NewService(balancer.ServicesIdentifier.GetCount(), balancer.SyncGroup)
         serverId = server.Id
         balancer.services[server.Id] = server
     }
