@@ -19,37 +19,6 @@ func sendRequests(client *client.Client, requestsNumber int) {
 }
 
 
-func decideOnError(toDoOnOk func() string, err error, newError error) (string, error) {
-    
-    if err == nil {
-        
-        return toDoOnOk(), nil
-    } else {
-        
-        return "", newError
-    }
-}
-
-
-func wrapSendRequest (client *client.Client, requestsNumber int) func() string {
-    
-    return func() string {
-        sendRequests(client, requestsNumber)
-        
-        return ""
-    }
-}
-
-
-func wrapServiceStatus (serviceId int) func() string {
-    
-    return func() string {
-        
-        return balancer.GetLoadBalancer().GetServiceStatus(serviceId)
-    }
-}
-
-
 func ProcessUserCommands (client *client.Client, command string) (string, error) {
     var input = strings.Split(command, " ")
     
@@ -58,11 +27,14 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
         case "send":
             requestsNumber, err := strconv.Atoi(input[1])
             
-            return decideOnError(
-                wrapSendRequest(client, requestsNumber),
-                err,
-                utils.NewNotNumberError(input[1]),
-            )
+            if err == nil {
+                sendRequests(client, requestsNumber)
+                
+                return "", nil
+            } else {
+                
+                return "", utils.NewNotNumberError(input[1])
+            }
         
         case "serverStatus":
             
@@ -74,11 +46,13 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
         case "serviceStatus":
             serviceId, err := strconv.Atoi(input[1])
             
-            return decideOnError(
-                wrapServiceStatus(serviceId),
-                err,
-                utils.NewNotNumberError(input[1]),
-            )
+            if err == nil {
+                
+                return balancer.GetLoadBalancer().GetServiceStatus(serviceId), nil
+            } else {
+                
+                return "", utils.NewNotNumberError(input[1])
+            }
         
         default:
             
