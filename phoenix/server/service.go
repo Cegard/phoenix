@@ -12,8 +12,9 @@ var currentCount int = 0
 
 
 type Service struct {
+    sync.Mutex
     Id int
-    IsAlive bool
+    IsRunning bool
     currentLoad *Load
     syncGroup *sync.WaitGroup
     successRequests *Load
@@ -26,7 +27,7 @@ func NewService(mainWaitGroup *sync.WaitGroup) *Service {
     
     return &Service {
         Id: currentCount,
-        IsAlive: true,
+        IsRunning: true,
         currentLoad: &Load{},
         syncGroup: mainWaitGroup,
         successRequests: &Load{},
@@ -68,18 +69,24 @@ func (server *Service) AddRequest (request *messages.Request, register func(int,
 
 
 func (server *Service) HasRoom() bool {
+    server.Lock()
+    defer server.Unlock()
     
     return server.currentLoad.GetValue() < utils.MaxServiceCapacity
 }
 
 
 func (server *Service) IsIdle() bool {
+    server.Lock()
+    defer server.Unlock()
     
     return server.currentLoad.GetValue() == 0
 }
 
 
 func (server *Service) String() string {
+    server.Lock()
+    defer server.Unlock()
     var successRate = 0.0
     var totalRequests = (server.successRequests.GetValue() + server.failedRequests.GetValue())
     
@@ -90,15 +97,22 @@ func (server *Service) String() string {
     }
     
     return fmt.Sprintf(
-        "Service: %d\n -- Currently processing: %d\n -- Is alive: %t\n" +
+        "Service: %d\n -- Currently processing: %d\n -- Is running: %t\n" +
                 " -- Total processed requests: %d\n -- Succeeded: %d\n -- Failed: %d\n" +
                 " -- Success rate: %f\n\n",
         server.Id,
         server.currentLoad.GetValue(),
-        server.IsAlive,
+        server.IsRunning,
         server.successRequests.GetValue() + server.failedRequests.GetValue(),
         server.successRequests.GetValue(),
         server.failedRequests.GetValue(),
         successRate,
     )
+}
+
+
+func (server *Service) ShutDown() {
+    server.Lock()
+    server.IsRunning = false
+    server.Unlock()
 }

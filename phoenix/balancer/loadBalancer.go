@@ -56,7 +56,7 @@ func (balancer *LoadBalancer) removeIdleServices () {
         
         if balancer.services[serviceId].IsIdle() &&
                 len(balancer.services) > utils.MinRunningServices {
-            balancer.services[serviceId].IsAlive = false
+            balancer.services[serviceId].ShutDown()
             balancer.stats.RegisterStat(
                 serviceId,
                 fmt.Sprintf("%s", balancer.services[serviceId]),
@@ -121,8 +121,8 @@ func (balancer *LoadBalancer) AssignRequest (request *messages.Request) {
 
 
 func (balancer *LoadBalancer) GetStatus() string {
-    balancer.stats.Lock()
-    defer balancer.stats.Unlock()
+    balancer.Lock()
+    defer balancer.Unlock()
     
     var status = fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services))
     

@@ -55,9 +55,11 @@ func TestServerInstanceDynamicRemoval (t *testing.T) {
         GetLoadBalancer().AssignRequest(client.MakeRequest())
     }
     
+    var firstServicesCount = GetLoadBalancer().TotalRunningInstances()
     time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
+    var secondServicesCount = GetLoadBalancer().TotalRunningInstances()
     
-    if GetLoadBalancer().TotalRunningInstances() != utils.MinRunningServices {
+    if secondServicesCount >= firstServicesCount {
         t.Errorf("Load Balancer instance not scaling down\n")
     }
 }
