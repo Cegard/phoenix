@@ -5,7 +5,7 @@ import (
 )
 
 
-type NotNumberError struct{
+type NotNumberError struct {
     originalValue string
 }
 

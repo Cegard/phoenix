@@ -12,7 +12,7 @@ type Request struct {
 }
 
 
-func NewRequest(respondTo func(*Response) ) *Request {
+func NewRequest(respondTo func (*Response) ) *Request {
     
     return &Request {
         RespondTo: respondTo,

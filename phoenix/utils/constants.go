@@ -6,7 +6,6 @@ const MinRunningServices = 1
 const MaxServiceCapacity = 10
 const SuccessProbability float64 = 0.99
 const (
-    WaitingStatus uint = iota
-    SucceededStatus
+    SucceededStatus uint = iota
     FailedStatus  
 )

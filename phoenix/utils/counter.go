@@ -12,21 +12,19 @@ type Counter struct {
 
 
 func (counter *Counter) addToCount (toAdd int) {
+    counter.Lock()
     counter.count = counter.count + toAdd
+    counter.Unlock()
 }
 
 
 func (counter *Counter) IncreaseCount() {
-    counter.Lock()
     counter.addToCount(1)
-    counter.Unlock()
 }
 
 
 func (counter *Counter) DecreaseCount() {
-    counter.Lock()
     counter.addToCount(-1)
-    counter.Unlock()
 }
 
 
