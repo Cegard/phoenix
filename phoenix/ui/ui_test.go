@@ -4,9 +4,10 @@ import (
     "phoenix/balancer"
     "phoenix/client"
     "phoenix/utils"
-    "testing"
     "time"
     "fmt"
+    "testing"
+    "github.com/stretchr/testify/assert"
 )
 
 
@@ -20,7 +21,10 @@ func TestProcessSendCommand (t *testing.T) {
     
     ProcessUserCommands(client, command)
     
-    if balancer.GetLoadBalancer().TotalRunningInstances() < requestsCoef {
-        t.Errorf("Load balancer is not processing the requests")
-    }
+    assert.GreaterOrEqual(
+        t,
+        requestsCoef,
+        balancer.GetLoadBalancer().TotalRunningInstances(),
+        "Load balancer is not processing the requests",
+    )
 }
