@@ -51,7 +51,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
             
             return fmt.Sprintf(
                 "\nProcessed requests so far: %d\n, %s",
-                len(client.ServerResponses),
+                len(client.GetResponses()),
                 joinStats(balancer.GetLoadBalancer().GetStatus()),
             ), nil
         

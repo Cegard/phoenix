@@ -20,7 +20,7 @@ func TestProcessRequest (t *testing.T) {
     wg.Add(1)
     service.processRequest(client.MakeRequest(), dummyRegister)
     
-    assert.NotEqual(t, client.ServerResponses, 0, "Service is not processing requests")
+    assert.NotEqual(t, client.GetResponses(), 0, "Service is not processing requests")
 }
 
 
