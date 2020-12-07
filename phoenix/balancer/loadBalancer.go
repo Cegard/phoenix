@@ -14,8 +14,8 @@ var loadBalancerInstance *LoadBalancer
 
 type LoadBalancer struct {
     sync.Mutex
-    SyncGroup *sync.WaitGroup
-    ServicesIdentifier *utils.Counter
+    syncGroup *sync.WaitGroup
+    servicesIdentifier *utils.Counter
     services map[int] *server.Service
     stats *Info
 }
@@ -26,8 +26,8 @@ func GetLoadBalancer() *LoadBalancer {
     if loadBalancerInstance == nil {
         loadBalancerInstance = &LoadBalancer {
             services: make(map[int] *server.Service),
-            SyncGroup: &sync.WaitGroup{},
-            ServicesIdentifier: &utils.Counter{},
+            syncGroup: &sync.WaitGroup{},
+            servicesIdentifier: &utils.Counter{},
             stats: NewInfo(),
         }
         
@@ -43,8 +43,8 @@ func fillLoadBalancer (balancer *LoadBalancer) {
     balancer.Lock()
     
     for id := 0; id < utils.MinRunningServices; id++ {
-        balancer.ServicesIdentifier.IncreaseCount()
-        var server = server.NewService(balancer.ServicesIdentifier.GetCount(), balancer.SyncGroup)
+        balancer.servicesIdentifier.IncreaseCount()
+        var server = server.NewService(balancer.servicesIdentifier.GetCount(), balancer.syncGroup)
         balancer.services[server.Id] = server
     }
     
@@ -101,8 +101,8 @@ func (balancer *LoadBalancer) assignRequest (request *messages.Request) bool {
     var serverId, wasFound = balancer.getNextFreeServerId()
     
     if !wasFound {
-        balancer.ServicesIdentifier.IncreaseCount()
-        var server = server.NewService(balancer.ServicesIdentifier.GetCount(), balancer.SyncGroup)
+        balancer.servicesIdentifier.IncreaseCount()
+        var server = server.NewService(balancer.servicesIdentifier.GetCount(), balancer.syncGroup)
         serverId = server.Id
         balancer.services[server.Id] = server
     }
@@ -125,6 +125,9 @@ func (balancer *LoadBalancer) AssignRequest (request *messages.Request) {
 
 
 func (balancer *LoadBalancer) GetStatus() []string {
+    balancer.Lock()
+    defer balancer.Unlock()
+    
     return balancer.
            stats.
            GetAllInfo(fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services)))
@@ -132,6 +135,8 @@ func (balancer *LoadBalancer) GetStatus() []string {
 
 
 func (balancer *LoadBalancer) GetServiceStatus (serviceId int) string {
+    balancer.Lock()
+    defer balancer.Unlock()
     
     return balancer.stats.GetEntryInfo(serviceId)
 }
