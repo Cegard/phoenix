@@ -124,25 +124,16 @@ func (balancer *LoadBalancer) AssignRequest (request *messages.Request) {
 }
 
 
-func (balancer *LoadBalancer) GetStatus() string {
-    balancer.stats.Lock()
-    defer balancer.stats.Unlock()
-    
-    var status = fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services))
-    
-    for index := range balancer.stats.Entries {
-        status += fmt.Sprintf("%s", balancer.stats.Entries[index])
-    }
-    
-    return status
+func (balancer *LoadBalancer) GetStatus() []string {
+    return balancer.
+           stats.
+           GetAllInfo(fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services)))
 }
 
 
 func (balancer *LoadBalancer) GetServiceStatus (serviceId int) string {
-    balancer.stats.Lock()
-    defer balancer.stats.Unlock()
     
-    return fmt.Sprintf("%s", balancer.stats.Entries[serviceId])
+    return balancer.stats.GetEntryInfo(serviceId)
 }
 
 

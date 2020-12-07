@@ -28,7 +28,7 @@ func TestGetLoadBalancer (t *testing.T) {
 }
 
 
-func TestServerInstanceCreation (t *testing.T) {
+func TestBalancerInstancesCreation (t *testing.T) {
     assert.Equal(
         t,
         GetLoadBalancer().TotalRunningInstances(),
@@ -38,7 +38,7 @@ func TestServerInstanceCreation (t *testing.T) {
 }
 
 
-func TestServerInstanceDynamicCreation (t *testing.T) {
+func TestBalancerInstancesDynamicCreation (t *testing.T) {
     var client = client.NewClient(0)
     
     for i := 0; i < (utils.MinRunningServices * utils.MaxServiceCapacity * 2); i++ {
@@ -54,7 +54,7 @@ func TestServerInstanceDynamicCreation (t *testing.T) {
 }
 
 
-func TestServerInstanceDynamicRemoval (t *testing.T) {
+func TestBalancerInstancesDynamicRemoval (t *testing.T) {
     var client = client.NewClient(0)
     
     for i := 0; i < (utils.MinRunningServices * utils.MaxServiceCapacity * 2); i++ {
@@ -72,3 +72,9 @@ func TestServerInstanceDynamicRemoval (t *testing.T) {
         "Load Balancer instance not scaling down\n",
     )
 }
+
+/*
+func TestGetStatus (t *testing.T) {
+    
+}
+*/

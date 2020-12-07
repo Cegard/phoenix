@@ -19,6 +19,17 @@ func sendRequests(client *client.Client, requestsNumber int) {
 }
 
 
+func joinStats (stats []string) string {
+    var jointStats = stats[0]
+    
+    for index := 1; index < len(stats); index++ {
+        jointStats = fmt.Sprintf("%s\n%s", jointStats, stats[index])
+    }
+    
+    return jointStats
+}
+
+
 func ProcessUserCommands (client *client.Client, command string) (string, error) {
     var input = strings.Split(command, " ")
     
@@ -40,8 +51,9 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
             
             return fmt.Sprintf(
                 "\nProcessed requests so far: %d\n, %s",
-                len(client.ServerResponses,
-            ), balancer.GetLoadBalancer().GetStatus()), nil
+                len(client.ServerResponses),
+                joinStats(balancer.GetLoadBalancer().GetStatus()),
+            ), nil
         
         case "serviceStatus":
             serviceId, err := strconv.Atoi(input[1])
