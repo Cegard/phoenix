@@ -13,6 +13,15 @@ type Client struct {
 }
 
 
+func NewClient (id int) *Client {
+    
+    return &Client {
+        Id: id,
+        ServerResponses: make([]*messages.Response, 0),
+    }
+}
+
+
 func (client *Client) MakeRequest() *messages.Request {
     
     return messages.NewRequest(client.SetResponse)
@@ -23,13 +32,4 @@ func (client *Client) SetResponse (response *messages.Response) {
     client.Lock()
     client.ServerResponses = append(client.ServerResponses, response)
     client.Unlock()
-}
-
-
-func NewClient (id int) *Client {
-    
-    return &Client {
-        Id: id,
-        ServerResponses: make([]*messages.Response, 0),
-    }
 }
