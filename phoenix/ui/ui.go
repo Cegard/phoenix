@@ -60,7 +60,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
             
             if err == nil {
                 
-                return balancer.GetLoadBalancer().GetServiceStatus(serviceId), nil
+                return balancer.GetLoadBalancer().Stats.GetEntryInfo(serviceId), nil
             } else {
                 
                 return "", utils.NewNotNumberError(input[1])

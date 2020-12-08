@@ -114,20 +114,6 @@ func TestTotalRunningInstances (t *testing.T) {
 }
 
 
-func TestGetServiceStatus (t *testing.T) {
-    var client = client.NewClient(0)
-    
-    GetLoadBalancer().AssignRequest(client.MakeRequest())
-    time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
-    
-    assert.NotNil(
-        t,
-        GetLoadBalancer().GetServiceStatus(0),
-        "Not retrieving service info",
-    )
-}
-
-
 func TestGetStatus (t *testing.T) {
     var asserter = assert.New(t)
     var requests = 500

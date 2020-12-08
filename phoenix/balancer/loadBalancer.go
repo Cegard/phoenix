@@ -1,6 +1,7 @@
 package balancer
 
 import (
+    "phoenix/info"
     "phoenix/messages"
     "phoenix/server"
     "phoenix/utils"
@@ -15,9 +16,9 @@ var loadBalancerInstance *LoadBalancer
 type LoadBalancer struct {
     sync.Mutex
     SyncGroup *sync.WaitGroup
+    Stats *info.Info
     servicesIdentifier *utils.Counter
     services map[int] *server.Service
-    stats *Info
 }
 
 
@@ -28,7 +29,7 @@ func GetLoadBalancer() *LoadBalancer {
             services: make(map[int] *server.Service),
             SyncGroup: &sync.WaitGroup{},
             servicesIdentifier: &utils.Counter{},
-            stats: NewInfo(),
+            Stats: info.NewInfo(),
         }
         
         fillLoadBalancer(loadBalancerInstance)
@@ -60,7 +61,7 @@ func (balancer *LoadBalancer) removeIdleServices () {
         if balancer.services[serviceId].IsIdle() &&
                 len(balancer.services) > utils.MinRunningServices {
             balancer.services[serviceId].ShutDown()
-            balancer.stats.RegisterStat(
+            balancer.Stats.RegisterStat(
                 serviceId,
                 fmt.Sprintf("%s", balancer.services[serviceId]),
             )
@@ -107,7 +108,7 @@ func (balancer *LoadBalancer) assignRequest (request *messages.Request) bool {
         balancer.services[server.Id] = server
     }
     
-    return balancer.services[serverId].AddRequest(request, balancer.stats.RegisterStat)
+    return balancer.services[serverId].AddRequest(request, balancer.Stats)
 }
 
 
@@ -129,16 +130,8 @@ func (balancer *LoadBalancer) GetStatus() []string {
     defer balancer.Unlock()
     
     return balancer.
-           stats.
+           Stats.
            GetAllInfo(fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services)))
-}
-
-
-func (balancer *LoadBalancer) GetServiceStatus (serviceId int) string {
-    balancer.Lock()
-    defer balancer.Unlock()
-    
-    return balancer.stats.GetEntryInfo(serviceId)
 }
 
 

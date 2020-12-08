@@ -1,6 +1,7 @@
 package server
 
 import (
+    "phoenix/info"
     "phoenix/messages"
     "phoenix/utils"
     "sync"
@@ -33,7 +34,7 @@ func NewService(id int, mainWaitGroup *sync.WaitGroup) *Service {
 }
 
 
-func (server *Service) processRequest (request *messages.Request, register func(int, string)) {
+func (server *Service) processRequest (request *messages.Request, registerer *info.Info) {
     time.Sleep(time.Second * request.TimeToProcess)
     
     if utils.RandomFloat() <= utils.SuccessProbability {
@@ -45,18 +46,20 @@ func (server *Service) processRequest (request *messages.Request, register func(
     }
     
     server.currentCount.DecreaseCount()
-    register(server.Id, fmt.Sprintf("%s", server))
+    registerer.RegisterStat(server.Id, fmt.Sprintf("%s", server))
     server.syncGroup.Done()
 }
 
 
-func (server *Service) AddRequest (request *messages.Request, register func(int, string)) bool {
+func (server *Service) AddRequest (request *messages.Request, registerer *info.Info) bool {
+    /*server.Lock()
+    defer server.Unlock()*/
     
-    if server.HasRoom() {
+    if server.HasRoom() && server.IsUp() {
         server.currentCount.IncreaseCount()
-        register(server.Id, fmt.Sprintf("%s", server))
+        registerer.RegisterStat(server.Id, fmt.Sprintf("%s", server))
         server.syncGroup.Add(1)
-        go server.processRequest(request, register)
+        go server.processRequest(request, registerer)
         
         return true
     }
@@ -112,4 +115,12 @@ func (server *Service) ShutDown() {
     server.Lock()
     server.isRunning = false
     server.Unlock()
+}
+
+
+func (server *Service) IsUp() bool {
+    server.Lock()
+    defer server.Unlock()
+    
+    return server.isRunning
 }
