@@ -77,3 +77,20 @@ func TestRandomFloat (t *testing.T) {
         "Random not float64",
     )
 }
+
+
+func TestNotNumberError (t *testing.T) {
+    var notNumberError = &NotNumberError{originalValue: "#"}
+    
+    assert.Error(
+        t,
+        notNumberError,
+        "It doesn't implements Error",
+    )
+    
+    assert.NotEmpty(
+        t,
+        fmt.Errorf("%w", notNumberError),
+        "It doesn't show get the error",
+    )
+}
