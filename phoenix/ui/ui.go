@@ -44,7 +44,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
                 return "", nil
             } else {
                 
-                return "", utils.NewNotNumberError(input[1])
+                return utils.CouldNotProcessMsg, utils.NewNotNumberError(input[1])
             }
         
         case "serverStatus":
@@ -63,11 +63,11 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
                 return balancer.GetLoadBalancer().Stats.GetEntryInfo(serviceId), nil
             } else {
                 
-                return "", utils.NewNotNumberError(input[1])
+                return utils.CouldNotProcessMsg, utils.NewNotNumberError(input[1])
             }
         
         default:
             
-            return fmt.Sprintf("Command not recognized\n"), nil
+            return utils.NotRecognizedMsg, nil
     }
 }

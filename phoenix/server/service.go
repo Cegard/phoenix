@@ -52,8 +52,6 @@ func (server *Service) processRequest (request *messages.Request, registerer *in
 
 
 func (server *Service) AddRequest (request *messages.Request, registerer *info.Info) bool {
-    /*server.Lock()
-    defer server.Unlock()*/
     
     if server.HasRoom() && server.IsUp() {
         server.currentCount.IncreaseCount()
