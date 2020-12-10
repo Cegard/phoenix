@@ -47,6 +47,7 @@ func fillLoadBalancer (balancer *LoadBalancer) {
         balancer.servicesIdentifier.IncreaseCount()
         var server = server.NewService(balancer.servicesIdentifier.GetCount(), balancer.SyncGroup)
         balancer.services[server.Id] = server
+        balancer.Stats.RegisterStat(server.Id, fmt.Sprintf("%s", server))
     }
     
     balancer.Unlock()
