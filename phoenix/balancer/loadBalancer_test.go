@@ -133,7 +133,6 @@ func TestGetStatus (t *testing.T) {
         GetLoadBalancer().GetStatus()[0],
         "History headers don't corresponds",
     )
-    
     asserter.GreaterOrEqual(
         len(GetLoadBalancer().GetStatus()),
         int(math.Ceil(float64(requests)/float64(utils.MaxServiceCapacity))),

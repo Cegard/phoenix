@@ -35,7 +35,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
     
     switch input[0] {
         
-        case "send":
+        case fmt.Sprintf("%s", utils.Send):
             requestsNumber, err := strconv.Atoi(input[1])
             
             if err == nil {
@@ -47,7 +47,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
                 return utils.CouldNotProcessMsg, utils.NewNotNumberError(input[1])
             }
         
-        case "serverStatus":
+        case fmt.Sprintf("%s", utils.ServerStatus):
             
             return fmt.Sprintf(
                 "\nProcessed requests so far: %d\n, %s",
@@ -55,7 +55,7 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
                 joinStats(balancer.GetLoadBalancer().GetStatus()),
             ), nil
         
-        case "serviceStatus":
+        case fmt.Sprintf("%s", utils.ServiceStatus):
             serviceId, err := strconv.Atoi(input[1])
             
             if err == nil {

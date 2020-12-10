@@ -87,7 +87,6 @@ func TestNotNumberError (t *testing.T) {
         notNumberError,
         "It doesn't implements Error",
     )
-    
     assert.NotEmpty(
         t,
         fmt.Errorf("%w", notNumberError),
