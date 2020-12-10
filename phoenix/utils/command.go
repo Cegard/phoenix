@@ -11,5 +11,5 @@ const (
 
 func (c Command) String() string{
     
-    return [...]string{"send", "balancerStatus", "serviceStatus"}[c]
+    return [...]string{"send", "overallStatus", "serviceStatus"}[c]
 }
