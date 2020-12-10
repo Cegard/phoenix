@@ -26,7 +26,7 @@ func main() {
             var message, err = ui.ProcessUserCommands(client, scanner.Text())
             
             if err == nil {
-                fmt.Printf("\n\n%s\n", message)
+                fmt.Printf("\n%s\n", message)
             } else {
                 fmt.Println(fmt.Errorf("%w", err))
             }

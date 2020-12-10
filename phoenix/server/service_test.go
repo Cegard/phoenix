@@ -16,11 +16,23 @@ func TestProcessRequest (t *testing.T) {
     var client = client.NewClient(0)
     var wg sync.WaitGroup
     var service = NewService(0, &wg)
+    var counter = &utils.Counter{}
     
     wg.Add(1)
-    service.processRequest(client.MakeRequest(), info.NewInfo())
+    service.processRequest(client.MakeRequest(), info.NewInfo(), counter)
     
-    assert.NotEqual(t, client.GetResponses(), 0, "Service is not processing requests")
+    assert.NotEqual(
+        t,
+        client.GetResponses(),
+        0,
+        "Service is not processing requests",
+    )
+    assert.Equal(
+        t,
+        1,
+        counter.GetCount(),
+        "Service is not counting processed requests",
+    )
 }
 
 
@@ -30,7 +42,7 @@ func TestServerLoadIncreases (t *testing.T) {
     var service = NewService(0, &wg)
     
     wg.Add(1)
-    service.AddRequest(client.MakeRequest(), info.NewInfo())
+    service.AddRequest(client.MakeRequest(), info.NewInfo(), &utils.Counter{})
     
     assert.GreaterOrEqual(
         t,
@@ -47,7 +59,7 @@ func TestServerLoadDecreases (t *testing.T) {
     var service = NewService(0, &wg)
     
     wg.Add(1)
-    service.AddRequest(client.MakeRequest(), info.NewInfo())
+    service.AddRequest(client.MakeRequest(), info.NewInfo(), &utils.Counter{})
     previousProcessingLoad := service.currentCount.GetCount()
     time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
@@ -66,7 +78,7 @@ func TestServerUpdatesHistory (t *testing.T) {
     var service = NewService(0, &wg)
     
     wg.Add(1)
-    service.AddRequest(client.MakeRequest(), info.NewInfo())
+    service.AddRequest(client.MakeRequest(), info.NewInfo(), &utils.Counter{})
     time.Sleep(1 + time.Second * time.Duration(utils.MaxProcessTime))
     
     assert.GreaterOrEqual(
@@ -86,17 +98,17 @@ func TestAddRequest (t *testing.T) {
     
     assert.True(
         t,
-        service.AddRequest(client.MakeRequest(), info),
+        service.AddRequest(client.MakeRequest(), info, &utils.Counter{}),
         "Service is not adding new requests",
     )
     
     for i := 0; i < utils.MaxServiceCapacity; i++ {
-        service.AddRequest(client.MakeRequest(), info)
+        service.AddRequest(client.MakeRequest(), info, &utils.Counter{})
     }
     
     assert.False(
         t,
-        service.AddRequest(client.MakeRequest(), info),
+        service.AddRequest(client.MakeRequest(), info, &utils.Counter{}),
         "Service is not rejecting new requests when has no room",
     )
 }
@@ -115,7 +127,7 @@ func TestHasRoom (t *testing.T) {
     )
     
     for i := 0; i < utils.MaxServiceCapacity; i++ {
-        service.AddRequest(client.MakeRequest(), info)
+        service.AddRequest(client.MakeRequest(), info, &utils.Counter{})
     }
     
     assert.False(
@@ -131,7 +143,7 @@ func TestIsIdle (t *testing.T) {
     var service = NewService(0, &wg)
     var client = client.NewClient(0)
     
-    service.AddRequest(client.MakeRequest(), info.NewInfo())
+    service.AddRequest(client.MakeRequest(), info.NewInfo(), &utils.Counter{})
     
     assert.False(
         t,

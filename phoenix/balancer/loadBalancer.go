@@ -19,6 +19,7 @@ type LoadBalancer struct {
     Stats *info.Info
     servicesIdentifier *utils.Counter
     services map[int] *server.Service
+    requestsCounter *utils.Counter
 }
 
 
@@ -30,6 +31,7 @@ func GetLoadBalancer() *LoadBalancer {
             SyncGroup: &sync.WaitGroup{},
             servicesIdentifier: &utils.Counter{},
             Stats: info.NewInfo(),
+            requestsCounter: &utils.Counter{},
         }
         
         fillLoadBalancer(loadBalancerInstance)
@@ -109,7 +111,9 @@ func (balancer *LoadBalancer) assignRequest (request *messages.Request) bool {
         balancer.services[server.Id] = server
     }
     
-    return balancer.services[serverId].AddRequest(request, balancer.Stats)
+    return balancer.
+           services[serverId].
+           AddRequest(request, balancer.Stats, balancer.requestsCounter)
 }
 
 
@@ -129,10 +133,15 @@ func (balancer *LoadBalancer) AssignRequest (request *messages.Request) {
 func (balancer *LoadBalancer) GetStatus() []string {
     balancer.Lock()
     defer balancer.Unlock()
+    var stats = []string{
+        fmt.Sprintf("\n\nTotal running services: %d\n\n",len(balancer.services)),
+        fmt.Sprintf("Processed requests so far: %d\n\n", balancer.requestsCounter.GetCount()),
+    }
     
-    return balancer.
-           Stats.
-           GetAllInfo(fmt.Sprintf("\n\nTotal running services: %d\n\n", len(balancer.services)))
+    return append(
+        stats,
+        balancer.Stats.GetAllInfo()...,
+    )
 }
 
 

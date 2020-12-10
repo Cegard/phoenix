@@ -46,14 +46,14 @@ func TestGetAllInfo (t *testing.T) {
     assert.Equal(
         t,
         dummyData,
-        info.GetAllInfo(dummyData)[0],
+        info.GetAllInfo()[0],
         "Info is not retrieving all data",
     )
     
     assert.Equal(
         t,
-        entriesNumber + 1,
-        len(info.GetAllInfo(dummyData)),
+        entriesNumber,
+        len(info.GetAllInfo()),
         "Info is not retrieving all data",
     )
 }

@@ -34,7 +34,11 @@ func NewService(id int, mainWaitGroup *sync.WaitGroup) *Service {
 }
 
 
-func (server *Service) processRequest (request *messages.Request, registerer *info.Info) {
+func (server *Service) processRequest (
+        request *messages.Request,
+        registerer *info.Info,
+        counter *utils.Counter,
+    ) {
     time.Sleep(time.Second * request.TimeToProcess)
     
     if utils.RandomFloat() <= utils.SuccessProbability {
@@ -47,17 +51,22 @@ func (server *Service) processRequest (request *messages.Request, registerer *in
     
     server.currentCount.DecreaseCount()
     registerer.RegisterStat(server.Id, fmt.Sprintf("%s", server))
+    counter.IncreaseCount()
     server.syncGroup.Done()
 }
 
 
-func (server *Service) AddRequest (request *messages.Request, registerer *info.Info) bool {
+func (server *Service) AddRequest (
+        request *messages.Request,
+        registerer *info.Info,
+        counter *utils.Counter,
+    ) bool {
     
     if server.HasRoom() && server.IsUp() {
         server.currentCount.IncreaseCount()
         registerer.RegisterStat(server.Id, fmt.Sprintf("%s", server))
         server.syncGroup.Add(1)
-        go server.processRequest(request, registerer)
+        go server.processRequest(request, registerer, counter)
         
         return true
     }
