@@ -44,7 +44,7 @@ func processSendCommand (client *client.Client, requestsString string) (string, 
 }
 
 
-func processServiceStatusCommand (client *client.Client, idString string) (string, error) {
+func processServiceStatusCommand (idString string) (string, error) {
     serviceId, err := strconv.Atoi(idString)
     
     if err == nil {
@@ -68,15 +68,11 @@ func ProcessUserCommands (client *client.Client, command string) (string, error)
         
         case fmt.Sprintf("%s", utils.ServerStatus):
             
-            return fmt.Sprintf(
-                "\nProcessed requests so far: %d %s",
-                len(client.GetResponses()),
-                joinStats(balancer.GetLoadBalancer().GetStatus()),
-            ), nil
+            return fmt.Sprintf("%s", joinStats(balancer.GetLoadBalancer().GetStatus())), nil
         
         case fmt.Sprintf("%s", utils.ServiceStatus):
             
-            return processServiceStatusCommand(client, input[1])
+            return processServiceStatusCommand(input[1])
         
         default:
             

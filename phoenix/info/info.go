@@ -35,14 +35,13 @@ func  (info *Info) GetEntryInfo (dataId int) string {
 }
 
 
-func (info *Info) GetAllInfo (header string) []string {
+func (info *Info) GetAllInfo () []string {
     info.Lock()
     defer info.Unlock()
     
-    var sliceIndex = 1;
-    var arraySize = len(info.entries) + 1
+    var sliceIndex = 0;
+    var arraySize = len(info.entries)
     var statuses = make([]string, arraySize)
-    statuses[0] = header
     
     for mapIndex := range info.entries {
         statuses[sliceIndex] = fmt.Sprintf("%s", info.entries[mapIndex])
